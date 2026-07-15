@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fábrica Control - Dashboard de Gerenciamento</title>
+    
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS v3 CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Config for custom theme colors & fonts -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                            950: '#0f0a1c',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712; /* zinc-950 */
+        }
+        .font-outfit {
+            font-family: 'Outfit', sans-serif;
+        }
+        /* Custom scrollbar for premium look */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col md:flex-row overflow-hidden">
+
+    <!-- LOGIN SCREEN OVERLAY -->
+    <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md">
+        <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl max-w-sm w-full space-y-5 shadow-2xl text-center">
+            <div class="flex flex-col items-center gap-3">
+                <div class="p-3 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white shadow-lg">
+                    <i data-lucide="toy-brick" class="w-8 h-8"></i>
+                </div>
+                <h2 class="font-outfit font-extrabold text-2xl bg-gradient-to-r from-white to-brand-400 bg-clip-text text-transparent">Fábrica Control</h2>
+                <p class="text-xs text-slate-400">Faça login com suas credenciais de acesso</p>
+            </div>
+            
+            <div class="space-y-3 text-left">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">E-mail</label>
+                    <input type="email" id="login-email" placeholder="nome@fabricacontrol.com" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-brand-500 rounded-xl px-4 py-2.5 text-sm text-slate-200 outline-none transition" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Senha</label>
+                    <input type="password" id="login-password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-brand-500 rounded-xl px-4 py-2.5 text-sm text-slate-200 outline-none transition" required>
+                </div>
+                <div id="login-error" class="text-xs text-rose-400 hidden font-medium">
+                    E-mail ou senha incorretos. Tente novamente.
+                </div>
+            </div>
+            
+            <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-semibold text-sm py-2.5 rounded-xl transition duration-200 shadow-lg shadow-brand-600/10">
+                Entrar no Painel
+            </button>
+            
+            <div class="pt-2 border-t border-slate-800/60 text-left space-y-1">
+                <span class="block text-[10px] text-slate-500 font-bold uppercase tracking-wider">Acesso de Demonstração:</span>
+                <span class="block text-[10px] text-slate-400">Admin: admin@fabricacontrol.com / admin123</span>
+                <span class="block text-[10px] text-slate-400">Func: carlos.souza@fabricacontrol.com / senhacarlos</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="w-full md:w-64 bg-slate-900/60 border-b md:border-b-0 md:border-r border-slate-800/80 backdrop-blur-xl flex flex-col sm:flex-row md:flex-col justify-between shrink-0 z-20">
+        <div class="flex flex-col sm:flex-row md:flex-col flex-1 sm:items-center md:items-stretch overflow-hidden">
+            <!-- Sidebar Header -->
+            <div class="h-16 md:h-20 flex items-center px-4 md:px-6 border-b sm:border-b-0 md:border-b border-slate-800/60 shrink-0">
+                <div class="flex items-center gap-2 md:gap-3">
+                    <div class="p-1.5 md:p-2 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 shadow-lg shadow-brand-500/20 text-white">
+                        <i data-lucide="toy-brick" class="w-5 h-5 md:w-6 md:h-6"></i>
+                    </div>
+                    <div>
+                        <span class="font-outfit font-extrabold text-base md:text-xl tracking-tight bg-gradient-to-r from-white via-slate-200 to-brand-400 bg-clip-text text-transparent">Fábrica Control</span>
+                        <span class="block text-[8px] md:text-[10px] text-slate-500 font-medium tracking-widest uppercase">Sistema ERP v2.4</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="p-2 md:p-4 flex flex-row md:flex-col gap-1 md:space-y-1.5 overflow-x-auto md:overflow-x-visible scrollbar-none flex-1 justify-start animate-none" id="nav-links">
+                <button onclick="switchTab('inventory')" id="btn-inventory" class="nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent shrink-0">
+                    <i data-lucide="package" class="w-4 h-4 md:w-5 md:h-5"></i>
+                    <span>Estoque</span>
+                </button>
+                
+                <button onclick="switchTab('progress')" id="btn-progress" class="nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent shrink-0">
+                    <i data-lucide="activity" class="w-4 h-4 md:w-5 md:h-5"></i>
+                    <span>Progresso</span>
+                </button>
+                
+                <button onclick="switchTab('recipes')" id="btn-recipes" class="nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent shrink-0">
+                    <i data-lucide="git-merge" class="w-4 h-4 md:w-5 md:h-5"></i>
+                    <span>Agrupamentos</span>
+                </button>
+
+                <button onclick="switchTab('team')" id="btn-team" class="nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent hidden shrink-0">
+                    <i data-lucide="users" class="w-4 h-4 md:w-5 md:h-5"></i>
+                    <span>Gerenciar Equipe</span>
+                </button>
+
+                <button onclick="switchTab('my-area')" id="btn-my-area" class="nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent hidden shrink-0">
+                    <i data-lucide="user" class="w-4 h-4 md:w-5 md:h-5"></i>
+                    <span>Minha Área</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-2 md:p-4 border-t sm:border-t-0 md:border-t border-slate-800/60 bg-slate-950/40 flex items-center justify-between gap-2 shrink-0">
+            <div class="flex items-center gap-2 md:gap-3 overflow-hidden">
+                <div id="user-avatar" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 font-bold font-outfit shrink-0 text-xs md:text-sm">
+                    AD
+                </div>
+                <div class="overflow-hidden hidden lg:block">
+                    <span id="user-name" class="block text-xs md:text-sm font-semibold text-slate-300 truncate">Administrador</span>
+                    <span id="user-role" class="block text-[10px] md:text-xs text-slate-500 truncate">Cargo: Admin</span>
+                </div>
+            </div>
+            <button onclick="logout()" class="p-1.5 md:p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-xl transition shrink-0" title="Sair / Trocar Conta">
+                <i data-lucide="log-out" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 flex flex-col min-w-0 bg-slate-950 relative overflow-y-auto">
+        <!-- Background decorative glows -->
+        <div class="absolute top-0 right-1/4 w-96 h-96 bg-brand-500/5 rounded-full filter blur-[100px] pointer-events-none"></div>
+        <div class="absolute bottom-1/4 left-1/3 w-96 h-96 bg-indigo-500/5 rounded-full filter blur-[100px] pointer-events-none"></div>
+
+        <!-- Top bar / Header -->
+        <header class="h-20 border-b border-slate-850 px-8 flex items-center justify-between shrink-0 relative z-10">
+            <div>
+                <h1 id="page-title" class="font-outfit font-bold text-2xl text-slate-100">Painel de Estoque</h1>
+                <p id="page-subtitle" class="text-xs text-slate-400 mt-0.5">Gerenciamento em tempo real de matérias-primas e insumos.</p>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <!-- Botão Desfazer Última Ação -->
+                <button id="btn-undo" onclick="triggerUndo()" disabled class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-850 hover:border-slate-700 text-slate-400 hover:text-slate-200 px-4 py-2 rounded-xl text-xs font-semibold transition duration-150">
+                    <i data-lucide="undo-2" class="w-4 h-4 text-brand-400"></i>
+                    <span>Reverter Última Ação</span>
+                </button>
+
+                <div class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-4 py-2 rounded-xl text-xs text-slate-300">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Fábrica em Operação</span>
+                </div>
+                <div class="text-right">
+                    <span id="current-date" class="block text-xs font-semibold text-slate-400">Segunda, 13 Jul 2026</span>
+                    <span id="current-time" class="block text-[10px] text-slate-500">11:13:00</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Container -->
+        <div class="flex-1 p-4 md:p-8 relative z-10 max-w-7xl w-full mx-auto">
+            
+            <!-- ABA ESTOQUE (INVENTÁRIO) -->
+            <section id="tab-content-inventory" class="space-y-6">
+                <!-- Stats Summary -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                    <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-4 md:p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                        <div>
+                            <span class="text-xs text-slate-400 font-semibold block mb-1">Total de Itens</span>
+                            <span id="stat-total-items" class="font-outfit font-extrabold text-2xl md:text-3xl text-slate-100">8</span>
+                        </div>
+                        <div class="p-2.5 md:p-3 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-xl shrink-0">
+                            <i data-lucide="layers" class="w-5 h-5 md:w-6 md:h-6"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-4 md:p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                        <div>
+                            <span class="text-xs text-slate-400 font-semibold block mb-1">Alertas Ativos</span>
+                            <span id="stat-alerts" class="font-outfit font-extrabold text-2xl md:text-3xl text-rose-500">4</span>
+                        </div>
+                        <div class="p-2.5 md:p-3 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-xl shrink-0">
+                            <i data-lucide="alert-triangle" class="w-5 h-5 md:w-6 md:h-6"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-4 md:p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                        <div>
+                            <span class="text-xs text-slate-400 font-semibold block mb-1">Capacidade Operacional</span>
+                            <span class="font-outfit font-extrabold text-2xl md:text-3xl text-emerald-400">92%</span>
+                        </div>
+                        <div class="p-2.5 md:p-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl shrink-0">
+                            <i data-lucide="trending-up" class="w-5 h-5 md:w-6 md:h-6"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-4 md:p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                        <div>
+                            <span class="text-xs text-slate-400 font-semibold block mb-1">Pedidos de Compra</span>
+                            <span class="font-outfit font-extrabold text-2xl md:text-3xl text-amber-400">3 Pendentes</span>
+                        </div>
+                        <div class="p-2.5 md:p-3 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-xl shrink-0">
+                            <i data-lucide="shopping-cart" class="w-5 h-5 md:w-6 md:h-6"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory Table Card -->
+                <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl">
+                    <div class="px-4 py-4 md:px-6 md:py-5 border-b border-slate-800/60 flex items-center justify-between flex-wrap gap-4">
+                        <div>
+                            <h3 class="font-outfit font-bold text-base md:text-lg text-slate-200">Lista de Matérias-Primas</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Clique nos botões de ajuste para simular alterações em tempo real.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="resetInventory()" class="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700/80 border border-slate-700/50 rounded-xl transition-all duration-200 shrink-0">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                                <span>Resetar Estoque</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-slate-950/50 border-b border-slate-800/80 text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                                    <th class="py-3 px-4 md:py-4 md:px-6">Insumo</th>
+                                    <th class="py-3 px-4 md:py-4 md:px-6">Categoria</th>
+                                    <th class="py-3 px-4 md:py-4 md:px-6 text-center">Quantidade Atual</th>
+                                    <th class="py-3 px-4 md:py-4 md:px-6 text-center">Unidade</th>
+                                    <th class="py-3 px-4 md:py-4 md:px-6 text-center">Status</th>
+                                    <th class="py-3 px-4 md:py-4 md:px-6 text-right">Ajustar Estoque</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-table-body" class="divide-y divide-slate-800/40 text-xs md:text-sm">
+                                <!-- Dynamic Rows Go Here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABA PROGRESSO (PRODUÇÃO) -->
+            <section id="tab-content-progress" class="hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" id="progress-cards-container">
+                    <!-- Dynamic Progress Cards Go Here -->
+                </div>
+            </section>
+
+            <!-- ABA AGRUPAMENTOS (RECEITAS & CÁLCULO) -->
+            <section id="tab-content-recipes" class="hidden space-y-6">
+                <!-- Info Alert -->
+                <div class="bg-brand-500/10 border border-brand-500/20 p-4 md:p-5 rounded-2xl flex gap-3 md:gap-4 items-start shadow-[0_0_20px_-5px_rgba(139,92,246,0.05)]">
+                    <div class="p-2 bg-brand-500/20 text-brand-300 rounded-xl shrink-0">
+                        <i data-lucide="cpu" class="w-5 h-5 md:w-6 md:h-6"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-outfit font-bold text-sm md:text-base text-slate-200">Calculadora Inteligente de Produção Máxima</h4>
+                        <p class="text-xs md:text-sm text-slate-400 mt-1 leading-relaxed">
+                            O sistema analisa as receitas dos brinquedos e compara a necessidade de cada ingrediente com os níveis atuais no <strong>Estoque</strong>. Ele detecta qual componente representa o <strong>menor gargalo</strong> e calcula exatamente a quantidade máxima que pode ser fabricada agora.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Form to create new Recipe -->
+                <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-4 md:p-6 rounded-2xl shadow-xl space-y-4">
+                    <div class="flex items-center justify-between cursor-pointer select-none gap-4" onclick="toggleNewRecipeForm()">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="plus-circle" class="w-5 h-5 text-brand-400 shrink-0"></i>
+                            <h4 class="font-outfit font-bold text-sm md:text-base text-slate-200">Criar Novo Produto / Receita</h4>
+                        </div>
+                        <div class="flex items-center gap-2 md:gap-3 shrink-0">
+                            <button onclick="event.stopPropagation(); toggleNewRecipeForm(true); document.getElementById('new-recipe-form').reset();" class="px-2.5 py-1 bg-brand-600/10 hover:bg-brand-600/20 text-brand-400 border border-brand-500/20 rounded-lg text-[10px] md:text-xs font-semibold transition shrink-0">
+                                Nova (Limpar)
+                            </button>
+                            <i data-lucide="chevron-down" id="recipe-form-chevron" class="w-4 h-4 md:w-5 md:h-5 text-slate-400 transition-transform duration-200"></i>
+                        </div>
+                    </div>
+                    
+                    <form id="new-recipe-form" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 border-t border-slate-800/60">
+                        <div class="space-y-3 md:space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                                <div>
+                                    <label class="block text-[10px] md:text-xs font-semibold text-slate-400 mb-1">Nome do Brinquedo</label>
+                                    <input type="text" id="new-recipe-name" placeholder="Ex: Patinete" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-brand-500 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-xs md:text-sm text-slate-200 outline-none transition" required>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] md:text-xs font-semibold text-slate-400 mb-1">Preço de Venda (R$)</label>
+                                    <input type="number" id="new-recipe-price" min="0" placeholder="Ex: 1500" class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-brand-500 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-xs md:text-sm text-slate-200 outline-none transition" required>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] md:text-xs font-semibold text-slate-400 mb-1">Descrição</label>
+                                <textarea id="new-recipe-desc" rows="2" placeholder="Descreva brevemente o brinquedo..." class="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-brand-500 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-xs md:text-sm text-slate-200 outline-none transition"></textarea>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                                <div>
+                                    <label class="block text-[10px] md:text-xs font-semibold text-slate-400 mb-1">Ícone (Lucide)</label>
+                                    <select id="new-recipe-icon" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-xs md:text-sm text-slate-300 outline-none">
+                                        <option value="toy-brick">Tijolo</option>
+                                        <option value="plane">Avião</option>
+                                        <option value="bike">Bicicleta</option>
+                                        <option value="gamepad-2">Controle</option>
+                                        <option value="palette">Paleta</option>
+                                        <option value="rocket">Foguete</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] md:text-xs font-semibold text-slate-400 mb-1">Cor do Gradiente</label>
+                                    <select id="new-recipe-gradient" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-xs md:text-sm text-slate-300 outline-none">
+                                        <option value="from-violet-500 to-fuchsia-600">Violeta -> Fuchsia</option>
+                                        <option value="from-rose-500 to-red-600">Rosa -> Vermelho</option>
+                                        <option value="from-cyan-500 to-blue-600">Ciano -> Azul</option>
+                                        <option value="from-emerald-500 to-teal-600">Esmeralda -> Teal</option>
+                                        <option value="from-amber-500 to-orange-600">Âmbar -> Laranja</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="block text-[10px] md:text-xs font-semibold text-slate-400">Definir Insumos Requeridos</label>
+                            <div id="recipe-insumos-selection" class="max-h-48 overflow-y-auto space-y-2 pr-2 border border-slate-800/80 p-3 rounded-xl bg-slate-950/40">
+                                <!-- Generated dynamically from inventory -->
+                            </div>
+                            <div class="pt-2 flex justify-end">
+                                <button type="submit" class="bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-semibold text-xs md:text-sm px-5 py-2 md:px-6 md:py-2.5 rounded-xl transition duration-200 shadow-lg shadow-brand-600/10 w-full sm:w-auto">
+                                    Adicionar Receita
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Recipes Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" id="recipes-cards-container">
+                    <!-- Dynamic Recipe Cards Go Here -->
+                </div>
+            </section>
+
+            <!-- ABA MINHA ÁREA (FUNCIONÁRIO) -->
+            <section id="tab-content-my-area" class="hidden space-y-6">
+                <!-- Stats Summary -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                    <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-4 md:p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                        <div>
+                            <span class="text-xs text-slate-400 font-semibold block mb-1">Vendas Diárias</span>
+                            <span class="font-outfit font-extrabold text-xl md:text-2xl text-slate-100">R$ 12.450,00</span>
+                        </div>
+                        <div class="p-2.5 md:p-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl shrink-0">
+                            <i data-lucide="dollar-sign" class="w-5 h-5 md:w-6 md:h-6"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-4 md:p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                        <div>
+                            <span class="text-xs text-slate-400 font-semibold block mb-1">Média Diária</span>
+                            <span class="font-outfit font-extrabold text-xl md:text-2xl text-slate-100">R$ 8.900,00</span>
+                        </div>
+                        <div class="p-2.5 md:p-3 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-xl shrink-0">
+                            <i data-lucide="bar-chart-3" class="w-5 h-5 md:w-6 md:h-6"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-4 md:p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                        <div>
+                            <span class="text-xs text-slate-400 font-semibold block mb-1">Vendas Mensais</span>
+                            <span class="font-outfit font-extrabold text-xl md:text-2xl text-slate-100">R$ 248.300,00</span>
+                        </div>
+                        <div class="p-2.5 md:p-3 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-xl shrink-0">
+                            <i data-lucide="trending-up" class="w-5 h-5 md:w-6 md:h-6"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-4 md:p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                        <div>
+                            <span class="text-xs text-slate-400 font-semibold block mb-1">Média Mensal</span>
+                            <span class="font-outfit font-extrabold text-xl md:text-2xl text-slate-100">R$ 210.000,00</span>
+                        </div>
+                        <div class="p-2.5 md:p-3 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-xl shrink-0">
+                            <i data-lucide="percent" class="w-5 h-5 md:w-6 md:h-6"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agenda Card -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+                    <!-- Add Appointment Form -->
+                    <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-4 md:p-6 rounded-2xl shadow-lg space-y-4 lg:col-span-1">
+                        <h3 class="font-outfit font-bold text-base md:text-lg text-slate-200">Adicionar Compromisso</h3>
+                        <form id="emp-agenda-form" onsubmit="addEmployeeAppointment(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Horário (HH:MM)</label>
+                                <input type="time" id="emp-app-time" class="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-xs md:text-sm text-slate-200 outline-none transition" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Título do Compromisso</label>
+                                <input type="text" id="emp-app-title" placeholder="Ex: Ajuste de Parafusos" class="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-xs md:text-sm text-slate-200 outline-none transition" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Descrição (Opcional)</label>
+                                <input type="text" id="emp-app-desc" placeholder="Ex: Montar chapa do carrinho" class="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-xs md:text-sm text-slate-200 outline-none transition">
+                            </div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-semibold text-xs md:text-sm py-2 md:py-2.5 rounded-xl transition duration-200 shadow-lg animate-glow">
+                                Adicionar Compromisso
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Interactive Agenda List -->
+                    <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-4 md:p-6 rounded-2xl shadow-lg lg:col-span-2 space-y-4">
+                        <h3 class="font-outfit font-bold text-base md:text-lg text-slate-200 flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-5 h-5 text-brand-400"></i>
+                            Agenda do Dia
+                        </h3>
+                        <div class="space-y-3 overflow-y-auto max-h-[300px]" id="employee-agenda-container">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABA MINHA EMPRESA (ADMINISTRADOR) -->
+            <section id="tab-content-my-company" class="hidden space-y-6">
+                <!-- Sales Dashboard Stats -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                    <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-4 md:p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                        <div>
+                            <span class="text-xs text-slate-400 font-semibold block mb-1">Total de Vendas</span>
+                            <span id="admin-total-sales" class="font-outfit font-extrabold text-2xl md:text-3xl bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">R$ 0,00</span>
+                        </div>
+                        <div class="p-2.5 md:p-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl shrink-0">
+                            <i data-lucide="dollar-sign" class="w-5 h-5 md:w-6 md:h-6"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-4 md:p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                        <div>
+                            <span class="text-xs text-slate-400 font-semibold block mb-1">Desempenho Geral</span>
+                            <span id="admin-performance-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                Sem Vendas Registradas
+                            </span>
+                        </div>
+                        <div class="p-2.5 md:p-3 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-xl shrink-0">
+                            <i data-lucide="line-chart" class="w-5 h-5 md:w-6 md:h-6"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+                    <!-- Form to Register Sales -->
+                    <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-4 md:p-6 rounded-2xl shadow-lg space-y-4 lg:col-span-1">
+                        <h3 class="font-outfit font-bold text-base md:text-lg text-slate-200">Registrar Nova Venda</h3>
+                        <form id="sales-form" onsubmit="registerSale(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Selecionar Produto (Receita)</label>
+                                <select id="sale-product-select" onchange="autoFillSalePrice(this.value)" class="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-xs md:text-sm text-slate-200 outline-none transition cursor-pointer mb-2" required>
+                                    <!-- Populated dynamically -->
+                                </select>
+                                <input type="text" id="sale-custom-name" placeholder="Digite o nome do produto..." class="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-xs md:text-sm text-slate-200 outline-none transition hidden">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Valor da Venda (R$)</label>
+                                <input type="number" id="sale-amount" min="1" step="0.01" placeholder="Ex: 1500" class="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-xs md:text-sm text-slate-200 outline-none transition" required>
+                            </div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs md:text-sm py-2 md:py-2.5 rounded-xl transition duration-200 shadow-lg">
+                                Adicionar Venda
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- List of Registered Sales -->
+                    <div class="bg-slate-950 bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-4 md:p-6 rounded-2xl shadow-lg lg:col-span-2 space-y-4">
+                        <h3 class="font-outfit font-bold text-base md:text-lg text-slate-200 flex items-center justify-between">
+                            <span>Histórico de Vendas</span>
+                            <span id="sales-count" class="text-xs font-normal text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700/50">0 vendas</span>
+                        </h3>
+                        <div class="overflow-y-auto max-h-[220px] space-y-2 pr-1" id="sales-history-container">
+                            <div class="text-xs text-slate-500 text-center py-8">Nenhuma venda registrada ainda.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABA GERENCIAMENTO DE EQUIPE (ADMIN) -->
+            <section id="tab-content-team" class="hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+                    <!-- Left: Employee Table -->
+                    <div class="lg:col-span-2 bg-slate-900/40 border border-slate-800/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl">
+                        <div class="px-4 py-4 md:px-6 md:py-5 border-b border-slate-800/60">
+                            <h3 class="font-outfit font-bold text-base md:text-lg text-slate-200">Equipe de Funcionários</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Altere credenciais de acesso da equipe ou selecione para gerenciar a agenda.</p>
+                        </div>
+
+                        <div class="overflow-x-auto w-full">
+                            <table class="w-full text-left border-collapse whitespace-nowrap">
+                                <thead>
+                                    <tr class="bg-slate-950/50 border-b border-slate-800/80 text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                                        <th class="py-3 px-4 md:py-4 md:px-6">Funcionário</th>
+                                        <th class="py-3 px-4 md:py-4 md:px-6">Cargo</th>
+                                        <th class="py-3 px-4 md:py-4 md:px-6">E-mail</th>
+                                        <th class="py-3 px-4 md:py-4 md:px-6">Senha</th>
+                                        <th class="py-3 px-4 md:py-4 md:px-6 text-right">Agenda</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="team-table-body" class="divide-y divide-slate-800/40 text-xs md:text-sm">
+                                    <!-- Dynamic Team Rows Go Here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right: Selected Employee Agenda Manager -->
+                    <div class="bg-slate-900/40 border border-slate-800/80 backdrop-blur-md rounded-2xl p-4 md:p-6 shadow-2xl flex flex-col justify-between space-y-4 lg:col-span-1" id="admin-agenda-manager">
+                        <div class="text-center py-12 text-slate-500 text-sm flex flex-col items-center justify-center h-full">
+                            <i data-lucide="calendar" class="w-8 h-8 mb-2 text-slate-600"></i>
+                            <span>Selecione um funcionário ao lado para gerenciar sua agenda.</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Centralized State
+        let inventory = [
+            { id: 'parafuso_20mm', name: 'Parafuso 20mm', category: 'Fixadores', quantity: 8, unit: 'unidades', icon: 'wrench' },
+            { id: 'parafuso_60mm', name: 'Parafuso 60mm', category: 'Fixadores', quantity: 15, unit: 'unidades', icon: 'wrench' },
+            { id: 'chapa_metalica', name: 'Chapas Metálicas', category: 'Estrutural', quantity: 15, unit: 'unidades', icon: 'grid' },
+            { id: 'escada', name: 'Escadas de Plástico', category: 'Componentes', quantity: 3, unit: 'unidades', icon: 'ladder' },
+            { id: 'roda_borracha', name: 'Rodas de Borracha', category: 'Componentes', quantity: 20, unit: 'unidades', icon: 'circle-dot' },
+            { id: 'bloco_madeira', name: 'Blocos de Madeira', category: 'Matéria-Prima', quantity: 6, unit: 'unidades', icon: 'box' },
+            { id: 'bloco_plastico', name: 'Blocos de Plástico', category: 'Matéria-Prima', quantity: 25, unit: 'unidades', icon: 'blocks' },
+            { id: 'motor_eletrico', name: 'Motores Elétricos', category: 'Eletrônico', quantity: 12, unit: 'unidades', icon: 'cpu' },
+            { id: 'microchip', name: 'Microchips', category: 'Eletrônico', quantity: 8, unit: 'unidades', icon: 'cpu' }
+        ];
+
+        const recipes = [
+            {
+                name: 'Escorregador',
+                description: 'Brinquedo de playground infantil em formato mini.',
+                icon: 'sliders',
+                gradient: 'from-blue-500 to-indigo-600',
+                glow: 'shadow-blue-500/10',
+                price: 1500,
+                requirements: [
+                    { id: 'parafuso_60mm', qty: 5 },
+                    { id: 'chapa_metalica', qty: 1 },
+                    { id: 'escada', qty: 1 }
+                ]
+            },
+            {
+                name: 'Carrinho de Madeira',
+                description: 'Carrinho clássico de brinquedo artesanal super resistente.',
+                icon: 'truck',
+                gradient: 'from-amber-500 to-orange-600',
+                glow: 'shadow-amber-500/10',
+                price: 350,
+                requirements: [
+                    { id: 'parafuso_20mm', qty: 10 },
+                    { id: 'roda_borracha', qty: 4 },
+                    { id: 'bloco_madeira', qty: 1 }
+                ]
+            },
+            {
+                name: 'Robô de Brinquedo',
+                description: 'Robô articulado programável com motorização.',
+                icon: 'bot',
+                gradient: 'from-emerald-500 to-teal-600',
+                glow: 'shadow-emerald-500/10',
+                price: 800,
+                requirements: [
+                    { id: 'parafuso_20mm', qty: 12 },
+                    { id: 'bloco_plastico', qty: 4 },
+                    { id: 'motor_eletrico', qty: 1 },
+                    { id: 'microchip', qty: 1 }
+                ]
+            }
+        ];
+
+        const production = [
+            {
+                name: 'Carrinho de Controle Remoto',
+                startDate: '10/07/2026',
+                deliveryDate: '15/07/2026',
+                progress: 65,
+                status: 'Montagem Elétrica',
+                color: 'from-cyan-500 to-blue-600',
+                materials: [
+                    { name: 'Motor Elétrico', qty: 1 },
+                    { name: 'Rodas de Borracha', qty: 4 },
+                    { name: 'Microchip', qty: 1 }
+                ]
+            },
+            {
+                name: 'Boneca de Pano Premium',
+                startDate: '12/07/2026',
+                deliveryDate: '18/07/2026',
+                progress: 30,
+                status: 'Costura & Detalhes',
+                color: 'from-rose-500 to-pink-600',
+                materials: [
+                    { name: 'Tecido de Algodão', qty: '1.5m²' },
+                    { name: 'Fibra de Enchimento', qty: '200g' },
+                    { name: 'Linha Colorida', qty: '2 rolos' }
+                ]
+            },
+            {
+                name: 'Trenzinho de Madeira',
+                startDate: '08/07/2026',
+                deliveryDate: '14/07/2026',
+                progress: 90,
+                status: 'Pintura & Secagem',
+                color: 'from-amber-500 to-orange-600',
+                materials: [
+                    { name: 'Bloco de Madeira', qty: '3 blocos' },
+                    { name: 'Tinta Verniz', qty: '1 lata' },
+                    { name: 'Parafuso 20mm', qty: 8 }
+                ]
+            },
+            {
+                name: 'Robô Mecânico Articulado',
+                startDate: '13/07/2026',
+                deliveryDate: '20/07/2026',
+                progress: 15,
+                status: 'Início de Montagem',
+                color: 'from-indigo-500 to-purple-600',
+                materials: [
+                    { name: 'Blocos de Plástico', qty: 4 },
+                    { name: 'Motores Elétricos', qty: 2 },
+                    { name: 'Microchips', qty: 1 }
+                ]
+            }
+        ];
+
+        // Clone initial inventory for resetting
+        const initialInventory = JSON.parse(JSON.stringify(inventory));
+        let editingRecipeIndex = null;
+        let currentUserRole = null;
+        let currentUserEmail = null;
+        let selectedEmployeeIndex = null;
+        let sales = [];
+        let lastActionState = null;
+
+        function saveStateForUndo() {
+            lastActionState = JSON.parse(JSON.stringify(inventory));
+            const btn = document.getElementById('btn-undo');
+            if (btn) {
+                btn.disabled = false;
+                btn.removeAttribute('disabled');
+                btn.classList.remove('opacity-40', 'cursor-not-allowed');
+            }
+        }
+
+        function triggerUndo() {
+            if (!lastActionState) return;
+
+            inventory = JSON.parse(JSON.stringify(lastActionState));
+            lastActionState = null;
+            
+            const btn = document.getElementById('btn-undo');
+            if (btn) {
+                btn.disabled = true;
+                btn.setAttribute('disabled', 'true');
+                btn.classList.add('opacity-40', 'cursor-not-allowed');
+            }
+
+            renderInventory();
+            renderRecipes();
+            lucide.createIcons();
+        }
+
+        let team = [
+            {
+                name: 'Ana Silva',
+                role: 'Funcionário',
+                email: 'ana.silva@fabricacontrol.com',
+                password: 'senhafuncionaria',
+                agenda: [
+                    { time: '09:00', title: 'Reunião de Alinhamento Diário', description: 'Metas de produção.', completed: false },
+                    { time: '14:00', title: 'Suporte no Estoque', description: 'Organização de parafusos.', completed: false }
+                ]
+            },
+            {
+                name: 'Carlos Souza',
+                role: 'Funcionário',
+                email: 'carlos.souza@fabricacontrol.com',
+                password: 'senhacarlos',
+                agenda: [
+                    { time: '10:00', title: 'Reunião Diária', description: 'Revisar metas do dia.', completed: false },
+                    { time: '11:30', title: 'Inspeção de Qualidade - Lote #304', description: 'Pintura do trenzinho.', completed: false },
+                    { time: '15:00', title: 'Apoio Linha Robôs', description: 'Instalar motores.', completed: false }
+                ]
+            },
+            {
+                name: 'Mariana Lima',
+                role: 'Funcionário',
+                email: 'mariana.lima@fabricacontrol.com',
+                password: 'senhamariana',
+                agenda: [
+                    { time: '09:00', title: 'Reunião Alinhamento', description: 'Metas semanais.', completed: false },
+                    { time: '16:00', title: 'Almoxarifado', description: 'Inventário físico.', completed: false }
+                ]
+            }
+        ];
+
+        // Dynamic Navigation DOM Builder (Total Security of Interface)
+        function renderSidebar(role) {
+            const navLinks = document.getElementById('nav-links');
+            if (!navLinks) return;
+
+            if (role === 'admin') {
+                navLinks.innerHTML = `
+                    <button onclick="switchTab('inventory')" id="btn-inventory" class="nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent shrink-0">
+                        <i data-lucide="package" class="w-4 h-4 md:w-5 md:h-5"></i>
+                        <span>Estoque</span>
+                    </button>
+                    
+                    <button onclick="switchTab('progress')" id="btn-progress" class="nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent shrink-0">
+                        <i data-lucide="activity" class="w-4 h-4 md:w-5 md:h-5"></i>
+                        <span>Progresso</span>
+                    </button>
+                    
+                    <button onclick="switchTab('recipes')" id="btn-recipes" class="nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent shrink-0">
+                        <i data-lucide="git-merge" class="w-4 h-4 md:w-5 md:h-5"></i>
+                        <span>Agrupamentos</span>
+                    </button>
+
+                    <button onclick="switchTab('team')" id="btn-team" class="nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent shrink-0">
+                        <i data-lucide="users" class="w-4 h-4 md:w-5 md:h-5"></i>
+                        <span>Gerenciar Equipe</span>
+                    </button>
+
+                    <button onclick="switchTab('my-company')" id="btn-my-company" class="nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent shrink-0">
+                        <i data-lucide="building-2" class="w-4 h-4 md:w-5 md:h-5"></i>
+                        <span>Minha Empresa</span>
+                    </button>
+                `;
+            } else if (role === 'funcionario') {
+                navLinks.innerHTML = `
+                    <button onclick="switchTab('my-area')" id="btn-my-area" class="nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent shrink-0">
+                        <i data-lucide="user" class="w-4 h-4 md:w-5 md:h-5"></i>
+                        <span>Minha Área</span>
+                    </button>
+                `;
+            } else {
+                navLinks.innerHTML = '';
+            }
+            lucide.createIcons();
+        }
+
+        // Login System
+        function handleLogin() {
+            const emailInput = document.getElementById('login-email').value.trim();
+            const passwordInput = document.getElementById('login-password').value.trim();
+            const errorDiv = document.getElementById('login-error');
+
+            if (emailInput === 'admin@fabricacontrol.com' && passwordInput === 'admin123') {
+                errorDiv.classList.add('hidden');
+                loginAs('admin', 'Administrador', 'admin@fabricacontrol.com');
+                return;
+            }
+
+            const employee = team.find(emp => emp.email === emailInput && emp.password === passwordInput);
+            if (employee) {
+                errorDiv.classList.add('hidden');
+                loginAs('funcionario', employee.name, employee.email);
+                return;
+            }
+
+            errorDiv.classList.remove('hidden');
+        }
+
+        function loginAs(role, name, email) {
+            currentUserRole = role;
+            currentUserEmail = email;
+            selectedEmployeeIndex = null;
+            document.getElementById('login-screen').classList.add('hidden');
+            
+            // Clean up login fields
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+
+            const userAvatar = document.getElementById('user-avatar');
+            const userName = document.getElementById('user-name');
+            const userRole = document.getElementById('user-role');
+
+            userName.innerText = name;
+            userRole.innerText = role === 'admin' ? 'Cargo: Admin' : 'Cargo: Funcionário';
+            
+            const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            userAvatar.innerText = initials;
+
+            // Apply visible tabs immediately in DOM structure
+            renderSidebar(role);
+
+            if (role === 'admin') {
+                switchTab('inventory');
+                renderTeam();
+                renderSales();
+                resetAdminAgendaPanel();
+            } else {
+                switchTab('my-area');
+                renderEmployeeAgenda();
+            }
+        }
+
+        function logout() {
+            currentUserRole = null;
+            currentUserEmail = null;
+            selectedEmployeeIndex = null;
+            document.getElementById('login-screen').classList.remove('hidden');
+            renderSidebar(null);
+            
+            // Hide all tab sections when logged out
+            document.getElementById('tab-content-inventory').classList.add('hidden');
+            document.getElementById('tab-content-progress').classList.add('hidden');
+            document.getElementById('tab-content-recipes').classList.add('hidden');
+            document.getElementById('tab-content-team').classList.add('hidden');
+            document.getElementById('tab-content-my-area').classList.add('hidden');
+            document.getElementById('tab-content-my-company').classList.add('hidden');
+        }
+
+        // Team Management Render
+        function renderTeam() {
+            const tbody = document.getElementById('team-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            team.forEach((emp, index) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-900/35 transition-colors duration-150';
+                row.innerHTML = `
+                    <td class="py-3 px-4 md:py-4 md:px-6 font-medium text-slate-200">${emp.name}</td>
+                    <td class="py-3 px-4 md:py-4 md:px-6 text-slate-400 text-xs">${emp.role}</td>
+                    <td class="py-3 px-4 md:py-4 md:px-6">
+                        <input type="email" value="${emp.email}" onchange="updateEmployeeEmail(${index}, this.value)" class="bg-slate-950/80 border border-slate-800 focus:border-brand-500 rounded-lg px-3 py-1.5 text-xs text-slate-300 outline-none w-full max-w-xs transition">
+                    </td>
+                    <td class="py-3 px-4 md:py-4 md:px-6">
+                        <input type="text" value="${emp.password}" onchange="updateEmployeePassword(${index}, this.value)" class="bg-slate-950/80 border border-slate-800 focus:border-brand-500 rounded-lg px-3 py-1.5 text-xs text-slate-300 outline-none w-full max-w-xs transition">
+                    </td>
+                    <td class="py-3 px-4 md:py-4 md:px-6 text-right">
+                        <button onclick="selectEmployeeForAgenda(${index})" class="px-3 py-1.5 bg-brand-600/10 hover:bg-brand-600/20 text-brand-400 border border-brand-500/20 rounded-lg text-xs font-semibold transition shrink-0">
+                            Gerenciar Agenda
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateEmployeeEmail(index, value) {
+            team[index].email = value.trim();
+        }
+
+        function updateEmployeePassword(index, value) {
+            team[index].password = value.trim();
+        }
+
+        // Sales Management
+        function registerSale(event) {
+            event.preventDefault();
+            const selectEl = document.getElementById('sale-product-select');
+            const customNameInput = document.getElementById('sale-custom-name');
+            const amountInput = document.getElementById('sale-amount');
+            
+            let product = '';
+            const val = selectEl.value;
+            
+            if (val === 'custom') {
+                product = customNameInput.value.trim();
+            } else {
+                const idx = parseInt(val);
+                if (recipes[idx]) {
+                    product = recipes[idx].name;
+                }
+            }
+            
+            const amount = parseFloat(amountInput.value) || 0;
+            
+            if (product && amount > 0) {
+                const now = new Date();
+                const timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+                const dateStr = now.toLocaleDateString('pt-BR') + ' ' + timeStr;
+                
+                sales.push({ product, amount, date: dateStr });
+                
+                // Reset inputs
+                selectEl.value = '';
+                customNameInput.value = '';
+                customNameInput.classList.add('hidden');
+                customNameInput.required = false;
+                amountInput.value = '';
+                
+                renderSales();
+            }
+        }
+
+        function renderSales() {
+            const totalSalesEl = document.getElementById('admin-total-sales');
+            const performanceBadgeEl = document.getElementById('admin-performance-badge');
+            const historyContainer = document.getElementById('sales-history-container');
+            const salesCountEl = document.getElementById('sales-count');
+            
+            if (!totalSalesEl) return;
+            
+            const total = sales.reduce((sum, item) => sum + item.amount, 0);
+            
+            // Format currency
+            totalSalesEl.innerText = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total);
+            salesCountEl.innerText = `${sales.length} ${sales.length === 1 ? 'venda' : 'vendas'}`;
+            
+            // Performance badge
+            if (total === 0) {
+                performanceBadgeEl.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20';
+                performanceBadgeEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>Sem Vendas Registradas`;
+            } else if (total < 10000) {
+                performanceBadgeEl.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20';
+                performanceBadgeEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Desempenho Estável`;
+            } else {
+                performanceBadgeEl.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+                performanceBadgeEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Desempenho Excelente!`;
+            }
+            
+            // Render History List
+            if (sales.length === 0) {
+                historyContainer.innerHTML = '<div class="text-xs text-slate-500 text-center py-8">Nenhuma venda registrada ainda.</div>';
+            } else {
+                historyContainer.innerHTML = [...sales].reverse().map(sale => `
+                    <div class="flex items-center justify-between p-3 bg-slate-950/40 border border-slate-800/80 rounded-xl hover:border-slate-700/60 transition duration-150">
+                        <div class="overflow-hidden">
+                            <span class="block text-sm font-semibold text-slate-200 truncate">${sale.product}</span>
+                            <span class="block text-[10px] text-slate-500">${sale.date}</span>
+                        </div>
+                        <span class="font-outfit font-bold text-sm text-emerald-400">${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(sale.amount)}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Employee Interactive Agenda Management
+        function renderEmployeeAgenda() {
+            const container = document.getElementById('employee-agenda-container');
+            if (!container) return;
+
+            const employee = team.find(emp => emp.email === currentUserEmail);
+            if (!employee || !employee.agenda) {
+                container.innerHTML = '<div class="text-xs text-slate-500 text-center py-8">Nenhum compromisso na agenda.</div>';
+                return;
+            }
+
+            if (employee.agenda.length === 0) {
+                container.innerHTML = '<div class="text-xs text-slate-500 text-center py-8">Nenhum compromisso na agenda. Crie um ao lado!</div>';
+                return;
+            }
+
+            // Sort by time
+            const sortedAgenda = [...employee.agenda].sort((a, b) => a.time.localeCompare(b.time));
+
+            container.innerHTML = sortedAgenda.map((item, idx) => {
+                // Find original index inside unsorted employee.agenda for updating state
+                const originalIndex = employee.agenda.indexOf(item);
+                return `
+                    <div class="flex items-center justify-between p-4 bg-slate-950/40 border ${item.completed ? 'border-slate-800/40 opacity-60' : 'border-slate-800'} rounded-xl transition duration-200">
+                        <div class="flex items-start gap-4 overflow-hidden">
+                            <span class="text-xs font-bold ${item.completed ? 'text-slate-500 bg-slate-850' : 'text-brand-400 bg-brand-500/10'} border border-slate-800 rounded px-2.5 py-1 uppercase shrink-0">${item.time}</span>
+                            <div class="overflow-hidden">
+                                <h4 class="text-sm font-semibold text-slate-200 ${item.completed ? 'line-through text-slate-500' : ''} truncate">${item.title}</h4>
+                                <p class="text-xs text-slate-400 mt-0.5 ${item.completed ? 'line-through text-slate-600' : ''} truncate">${item.description || 'Sem descrição.'}</p>
+                            </div>
+                        </div>
+                        <button onclick="toggleCompleteAppointment(${originalIndex})" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition border shrink-0 ${item.completed ? 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/60' : 'bg-emerald-600/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-600 hover:text-white'}">
+                            ${item.completed ? 'Desfazer' : 'Concluir'}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleCompleteAppointment(index) {
+            const employee = team.find(emp => emp.email === currentUserEmail);
+            if (employee && employee.agenda[index]) {
+                employee.agenda[index].completed = !employee.agenda[index].completed;
+                renderEmployeeAgenda();
+            }
+        }
+
+        function addEmployeeAppointment(event) {
+            event.preventDefault();
+            const employee = team.find(emp => emp.email === currentUserEmail);
+            if (!employee) return;
+
+            const timeInput = document.getElementById('emp-app-time');
+            const titleInput = document.getElementById('emp-app-title');
+            const descInput = document.getElementById('emp-app-desc');
+
+            const time = timeInput.value;
+            const title = titleInput.value.trim();
+            const description = descInput.value.trim();
+
+            if (time && title) {
+                employee.agenda.push({ time, title, description, completed: false });
+                
+                // Clear fields
+                timeInput.value = '';
+                titleInput.value = '';
+                descInput.value = '';
+
+                renderEmployeeAgenda();
+            }
+        }
+
+        // Admin Employee Agenda Management
+        function resetAdminAgendaPanel() {
+            const panel = document.getElementById('admin-agenda-manager');
+            if (!panel) return;
+            panel.innerHTML = `
+                <div class="text-center py-12 text-slate-500 text-sm flex flex-col items-center justify-center h-full">
+                    <i data-lucide="calendar" class="w-8 h-8 mb-2 text-slate-600"></i>
+                    <span>Selecione um funcionário ao lado para gerenciar sua agenda.</span>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function selectEmployeeForAgenda(index) {
+            selectedEmployeeIndex = index;
+            renderAdminAgendaManager();
+        }
+
+        function renderAdminAgendaManager() {
+            const panel = document.getElementById('admin-agenda-manager');
+            if (!panel) return;
+
+            const emp = team[selectedEmployeeIndex];
+            if (!emp) {
+                resetAdminAgendaPanel();
+                return;
+            }
+
+            // Render agenda items list
+            let listHtml = '';
+            if (!emp.agenda || emp.agenda.length === 0) {
+                listHtml = '<div class="text-xs text-slate-500 text-center py-8">Nenhum compromisso na agenda deste funcionário.</div>';
+            } else {
+                const sorted = [...emp.agenda].sort((a, b) => a.time.localeCompare(b.time));
+                listHtml = sorted.map(item => {
+                    const originalIdx = emp.agenda.indexOf(item);
+                    return `
+                        <div class="flex items-center justify-between p-2.5 bg-slate-950/40 border border-slate-800/80 rounded-xl">
+                            <div class="overflow-hidden pr-2">
+                                <span class="inline-block text-[10px] font-bold text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700/50 mb-1">${item.time}</span>
+                                <h4 class="text-xs font-semibold text-slate-200 truncate ${item.completed ? 'line-through text-slate-500' : ''}">${item.title}</h4>
+                            </div>
+                            <button onclick="removeAdminAppointment(${originalIdx})" class="p-1.5 text-rose-400 hover:bg-slate-800 rounded-lg transition" title="Remover Compromisso">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            panel.innerHTML = `
+                <div class="space-y-4">
+                    <div class="border-b border-slate-800/60 pb-3">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Agenda Ativa</span>
+                        <h3 class="font-outfit font-bold text-base text-slate-200 truncate">${emp.name}</h3>
+                    </div>
+
+                    <!-- Agenda List -->
+                    <div class="space-y-2 max-h-[180px] overflow-y-auto pr-1">
+                        ${listHtml}
+                    </div>
+                </div>
+
+                <!-- Add Form -->
+                <div class="border-t border-slate-800/60 pt-4 space-y-3">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Novo Compromisso</span>
+                    <form onsubmit="addAdminAppointment(event)" class="space-y-2.5">
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="col-span-1">
+                                <input type="time" id="admin-app-time" class="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 outline-none" required>
+                            </div>
+                            <div class="col-span-2">
+                                <input type="text" id="admin-app-title" placeholder="Título" class="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 outline-none" required>
+                            </div>
+                        </div>
+                        <input type="text" id="admin-app-desc" placeholder="Descrição (Opcional)" class="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 outline-none">
+                        
+                        <button type="submit" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs py-2 rounded-lg transition duration-200 shadow-lg">
+                            Adicionar na Agenda
+                        </button>
+                    </form>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function addAdminAppointment(event) {
+            event.preventDefault();
+            const emp = team[selectedEmployeeIndex];
+            if (!emp) return;
+
+            const timeEl = document.getElementById('admin-app-time');
+            const titleEl = document.getElementById('admin-app-title');
+            const descEl = document.getElementById('admin-app-desc');
+
+            const time = timeEl.value;
+            const title = titleEl.value.trim();
+            const description = descEl.value.trim();
+
+            if (time && title) {
+                if (!emp.agenda) emp.agenda = [];
+                emp.agenda.push({ time, title, description, completed: false });
+                
+                // Clear fields
+                timeEl.value = '';
+                titleEl.value = '';
+                descEl.value = '';
+
+                renderAdminAgendaManager();
+            }
+        }
+
+        function removeAdminAppointment(index) {
+            const emp = team[selectedEmployeeIndex];
+            if (emp && emp.agenda && emp.agenda[index]) {
+                emp.agenda.splice(index, 1);
+                renderAdminAgendaManager();
+            }
+        }
+
+        // Switch Active Tabs
+        function switchTab(tabId) {
+            // Guard lock: block employees from accessing admin pages, and vice-versa
+            if (currentUserRole === 'funcionario' && tabId !== 'my-area') {
+                return;
+            }
+            if (currentUserRole === 'admin' && tabId === 'my-area') {
+                return;
+            }
+
+            // Hide all tab sections
+            document.getElementById('tab-content-inventory').classList.add('hidden');
+            document.getElementById('tab-content-progress').classList.add('hidden');
+            document.getElementById('tab-content-recipes').classList.add('hidden');
+            document.getElementById('tab-content-team').classList.add('hidden');
+            document.getElementById('tab-content-my-area').classList.add('hidden');
+            document.getElementById('tab-content-my-company').classList.add('hidden');
+            
+            // Remove active style from all sidebar buttons
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(btn => {
+                btn.className = 'nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent shrink-0';
+            });
+
+            // Set specific page titles
+            const pageTitle = document.getElementById('page-title');
+            const pageSubtitle = document.getElementById('page-subtitle');
+
+            if (tabId === 'inventory') {
+                document.getElementById('tab-content-inventory').classList.remove('hidden');
+                const btn = document.getElementById('btn-inventory');
+                if (btn) btn.className = 'nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 bg-brand-600/10 text-brand-400 border border-brand-500/20 shadow-[0_0_15px_-3px_rgba(139,92,246,0.1)] shrink-0';
+                pageTitle.innerText = 'Painel de Estoque';
+                pageSubtitle.innerText = 'Gerenciamento em tempo real de matérias-primas e insumos.';
+            } else if (tabId === 'progress') {
+                document.getElementById('tab-content-progress').classList.remove('hidden');
+                const btn = document.getElementById('btn-progress');
+                if (btn) btn.className = 'nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 bg-brand-600/10 text-brand-400 border border-brand-500/20 shadow-[0_0_15px_-3px_rgba(139,92,246,0.1)] shrink-0';
+                pageTitle.innerText = 'Linha de Produção';
+                pageSubtitle.innerText = 'Status de andamento e insumos alocados por brinquedo.';
+            } else if (tabId === 'recipes') {
+                document.getElementById('tab-content-recipes').classList.remove('hidden');
+                const btn = document.getElementById('btn-recipes');
+                if (btn) btn.className = 'nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 bg-brand-600/10 text-brand-400 border border-brand-500/20 shadow-[0_0_15px_-3px_rgba(139,92,246,0.1)] shrink-0';
+                pageTitle.innerText = 'Agrupamento & Receitas';
+                pageSubtitle.innerText = 'Cálculo de rendimento e gargalos baseados nos insumos disponíveis.';
+            } else if (tabId === 'team') {
+                document.getElementById('tab-content-team').classList.remove('hidden');
+                const btn = document.getElementById('btn-team');
+                if (btn) btn.className = 'nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 bg-brand-600/10 text-brand-400 border border-brand-500/20 shadow-[0_0_15px_-3px_rgba(139,92,246,0.1)] shrink-0';
+                pageTitle.innerText = 'Gerenciamento de Equipe';
+                pageSubtitle.innerText = 'Altere credenciais de acesso da equipe de funcionários.';
+            } else if (tabId === 'my-company') {
+                document.getElementById('tab-content-my-company').classList.remove('hidden');
+                const btn = document.getElementById('btn-my-company');
+                if (btn) btn.className = 'nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 bg-brand-600/10 text-brand-400 border border-brand-500/20 shadow-[0_0_15px_-3px_rgba(139,92,246,0.1)] shrink-0';
+                pageTitle.innerText = 'Minha Empresa';
+                pageSubtitle.innerText = 'Visão geral de vendas, faturamento e desempenho da fábrica.';
+            } else if (tabId === 'my-area') {
+                document.getElementById('tab-content-my-area').classList.remove('hidden');
+                const btn = document.getElementById('btn-my-area');
+                if (btn) btn.className = 'nav-btn flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 bg-brand-600/10 text-brand-400 border border-brand-500/20 shadow-[0_0_15px_-3px_rgba(139,92,246,0.1)] shrink-0';
+                pageTitle.innerText = 'Minha Área';
+                pageSubtitle.innerText = 'Visão geral de suas metas, agenda e desempenho.';
+            }
+        }
+
+        // Render Inventory Table Data
+        function renderInventory() {
+            const tableBody = document.getElementById('inventory-table-body');
+            if (!tableBody) return;
+            tableBody.innerHTML = '';
+
+            let alertsCount = 0;
+
+            inventory.forEach((item, index) => {
+                const isCritical = item.quantity < 10;
+                if (isCritical) alertsCount++;
+
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-900/35 transition-colors duration-150';
+                
+                row.innerHTML = `
+                    <td class="py-3 px-4 md:py-4 md:px-6 font-medium text-slate-200">
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <div class="p-1.5 md:p-2 rounded-lg bg-slate-800 text-slate-400 shrink-0">
+                                <i data-lucide="${item.icon || 'box'}" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
+                            </div>
+                            <span class="truncate">${item.name}</span>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 md:py-4 md:px-6 text-slate-400 text-xs">${item.category}</td>
+                    <td class="py-3 px-4 md:py-4 md:px-6 text-center">
+                        <span class="font-outfit font-bold text-sm md:text-base ${isCritical ? 'text-rose-400 font-extrabold' : 'text-slate-200'}">${item.quantity}</span>
+                    </td>
+                    <td class="py-3 px-4 md:py-4 md:px-6 text-center text-slate-400 text-xs">${item.unit}</td>
+                    <td class="py-3 px-4 md:py-4 md:px-6 text-center">
+                        ${isCritical ? `
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 md:gap-1.5 md:px-3 md:py-1 rounded-full text-[9px] md:text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 animate-pulse">
+                                <span class="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-rose-500"></span>
+                                Urgente
+                            </span>
+                        ` : `
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 md:gap-1.5 md:px-3 md:py-1 rounded-full text-[9px] md:text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/10">
+                                <span class="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-emerald-400"></span>
+                                Estável
+                            </span>
+                        `}
+                    </td>
+                    <td class="py-3 px-4 md:py-4 md:px-6 text-right">
+                        <div class="inline-flex gap-1 bg-slate-950/60 p-1 border border-slate-800 rounded-lg">
+                            <button onclick="adjustQuantity('${item.id}', -1)" class="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded transition-all duration-150">
+                                <i data-lucide="minus" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
+                            </button>
+                            <button onclick="adjustQuantity('${item.id}', 1)" class="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded transition-all duration-150">
+                                <i data-lucide="plus" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Update stats
+            document.getElementById('stat-alerts').innerText = alertsCount;
+            const statAlertsEl = document.getElementById('stat-alerts');
+            if (alertsCount > 0) {
+                statAlertsEl.className = 'font-outfit font-extrabold text-3xl text-rose-500';
+            } else {
+                statAlertsEl.className = 'font-outfit font-extrabold text-3xl text-emerald-400';
+            }
+            document.getElementById('stat-total-items').innerText = inventory.length;
+
+            // Update recipe insumos selection list
+            renderRecipeInsumosSelection();
+
+            lucide.createIcons();
+        }
+
+        // Adjust Quantity Handler
+        function adjustQuantity(itemId, amount) {
+            const item = inventory.find(i => i.id === itemId);
+            if (item) {
+                item.quantity = Math.max(0, item.quantity + amount);
+                renderInventory();
+                // Render recipes calculations since inventory changed
+                renderRecipes();
+            }
+        }
+
+        // Reset Inventory
+        function resetInventory() {
+            saveStateForUndo();
+            inventory = JSON.parse(JSON.stringify(initialInventory));
+            renderInventory();
+            renderRecipes();
+        }
+
+        // Render Production Progress Cards
+        function renderProgress() {
+            const container = document.getElementById('progress-cards-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            production.forEach(item => {
+                const materialsHtml = item.materials.map(mat => `
+                    <div class="flex items-center justify-between text-xs py-1 border-b border-slate-800/40">
+                        <span class="text-slate-400">${mat.name}</span>
+                        <span class="font-semibold text-slate-200 bg-slate-800/60 px-2 py-0.5 rounded border border-slate-700/50">${mat.qty}</span>
+                    </div>
+                `).join('');
+
+                const card = document.createElement('div');
+                card.className = 'bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-6 rounded-2xl flex flex-col justify-between shadow-lg hover:shadow-xl hover:border-slate-700/50 transition-all duration-300 group';
+                
+                card.innerHTML = `
+                    <div>
+                        <!-- Header -->
+                        <div class="flex justify-between items-start gap-4">
+                            <div>
+                                <h3 class="font-outfit font-bold text-lg text-slate-200 group-hover:text-white transition-colors">${item.name}</h3>
+                                <span class="inline-block text-[10px] font-bold text-slate-400 bg-slate-800 border border-slate-700/80 rounded px-2 py-0.5 mt-1.5 uppercase tracking-wider">${item.status}</span>
+                            </div>
+                            <span class="font-outfit font-extrabold text-xl bg-gradient-to-r ${item.color} bg-clip-text text-transparent">${item.progress}%</span>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="mt-5 w-full bg-slate-800/60 h-2.5 rounded-full overflow-hidden border border-slate-700/30">
+                            <div class="bg-gradient-to-r ${item.color} h-full rounded-full transition-all duration-500" style="width: ${item.progress}%"></div>
+                        </div>
+
+                        <!-- Dates -->
+                        <div class="flex justify-between items-center text-[10px] text-slate-500 mt-2 font-medium">
+                            <span>Início: ${item.startDate}</span>
+                            <span>Prazo: ${item.deliveryDate}</span>
+                        </div>
+
+                        <!-- Consumed Materials -->
+                        <div class="mt-6">
+                            <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500 block mb-2">Materiais Consumidos:</span>
+                            <div class="space-y-1">
+                                ${materialsHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Render Insumos Selection for New Recipe Form
+        function renderRecipeInsumosSelection() {
+            const container = document.getElementById('recipe-insumos-selection');
+            if (!container) return;
+            
+            // Keep track of currently checked states
+            const checkedStates = {};
+            const qtyValues = {};
+            inventory.forEach(item => {
+                const cb = document.getElementById(`checkbox-${item.id}`);
+                const qi = document.getElementById(`qty-${item.id}`);
+                checkedStates[item.id] = cb ? cb.checked : false;
+                qtyValues[item.id] = qi ? qi.value : "1";
+            });
+
+            container.innerHTML = inventory.map(item => `
+                <div class="flex items-center justify-between text-xs py-1">
+                    <label class="flex items-center gap-2 text-slate-300 select-none cursor-pointer">
+                        <input type="checkbox" id="checkbox-${item.id}" value="${item.id}" ${checkedStates[item.id] ? 'checked' : ''} class="rounded border-slate-800 bg-slate-900 text-brand-600 focus:ring-brand-500 focus:ring-offset-slate-950 w-4 h-4">
+                        <span>${item.name}</span>
+                    </label>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-slate-500 text-[10px]">Qtde:</span>
+                        <input type="number" id="qty-${item.id}" min="1" value="${qtyValues[item.id]}" class="w-12 bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-center text-slate-200 text-xs focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Rename logic
+        function startRename(index) {
+            editingRecipeIndex = index;
+            renderRecipes();
+            setTimeout(() => {
+                const input = document.getElementById(`input-rename-${index}`);
+                if (input) {
+                    input.focus();
+                    input.select();
+                }
+            }, 50);
+        }
+
+        function saveRename(index) {
+            const input = document.getElementById(`input-rename-${index}`);
+            if (input) {
+                const newName = input.value.trim();
+                if (newName && newName !== recipes[index].name) {
+                    recipes[index].name = newName;
+                    renderSalesAutocomplete();
+                }
+            }
+            editingRecipeIndex = null;
+            renderRecipes();
+        }
+
+        function cancelRename() {
+            editingRecipeIndex = null;
+            renderRecipes();
+        }
+
+        // New Recipe Form toggler
+        function toggleNewRecipeForm(forceState) {
+            const form = document.getElementById('new-recipe-form');
+            const chevron = document.getElementById('recipe-form-chevron');
+            if (!form) return;
+            const isHidden = form.classList.contains('hidden');
+            const shouldShow = forceState !== undefined ? forceState : isHidden;
+
+            if (shouldShow) {
+                form.classList.remove('hidden');
+                chevron.classList.add('rotate-180');
+            } else {
+                form.classList.add('hidden');
+                chevron.classList.remove('rotate-180');
+            }
+        }
+
+        function updateRecipePrice(index, value) {
+            recipes[index].price = parseFloat(value) || 0;
+            renderSalesAutocomplete();
+        }
+
+        function deleteRecipe(index) {
+            if (confirm(`Tem certeza que deseja excluir a receita "${recipes[index].name}"?`)) {
+                recipes.splice(index, 1);
+                renderRecipes();
+                renderSalesAutocomplete();
+            }
+        }
+
+        function renderSalesAutocomplete() {
+            const select = document.getElementById('sale-product-select');
+            if (!select) return;
+            
+            const curVal = select.value;
+            let html = '<option value="" disabled selected>-- Selecione um Produto --</option>';
+            recipes.forEach((r, idx) => {
+                html += `<option value="${idx}">${r.name} - R$ ${r.price || 0}</option>`;
+            });
+            html += '<option value="custom">Outro Produto (Digitar)...</option>';
+            select.innerHTML = html;
+            
+            if (curVal && select.querySelector(`option[value="${curVal}"]`)) {
+                select.value = curVal;
+            }
+        }
+
+        function autoFillSalePrice(val) {
+            const amountInput = document.getElementById('sale-amount');
+            const customNameInput = document.getElementById('sale-custom-name');
+            
+            if (val === 'custom') {
+                customNameInput.classList.remove('hidden');
+                customNameInput.required = true;
+                customNameInput.focus();
+                amountInput.value = '';
+            } else {
+                customNameInput.classList.add('hidden');
+                customNameInput.required = false;
+                const recipeIndex = parseInt(val);
+                const recipe = recipes[recipeIndex];
+                if (recipe) {
+                    amountInput.value = recipe.price || 0;
+                }
+            }
+        }
+
+        // Render Recipes and Calculate Max Production (Gargalo logic)
+        function renderRecipes() {
+            const container = document.getElementById('recipes-cards-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            recipes.forEach((recipe, index) => {
+                let maxProduction = Infinity;
+                let bottlenecks = [];
+
+                // Calculate the max units we can produce for this recipe based on available stock
+                recipe.requirements.forEach(req => {
+                    const stockItem = inventory.find(item => item.id === req.id);
+                    const stockQty = stockItem ? stockItem.quantity : 0;
+                    const possibleUnits = Math.floor(stockQty / req.qty);
+                    
+                    if (possibleUnits < maxProduction) {
+                        maxProduction = possibleUnits;
+                    }
+                });
+
+                // Detect exact bottlenecks (materials that limit this maximum)
+                recipe.requirements.forEach(req => {
+                    const stockItem = inventory.find(item => item.id === req.id);
+                    const stockQty = stockItem ? stockItem.quantity : 0;
+                    const possibleUnits = Math.floor(stockQty / req.qty);
+                    
+                    if (possibleUnits === maxProduction) {
+                        bottlenecks.push({
+                            name: stockItem ? stockItem.name : req.id,
+                            available: stockQty,
+                            required: req.qty
+                        });
+                    }
+                });
+
+                if (maxProduction === Infinity) maxProduction = 0;
+
+                // Build HTML for recipe requirements
+                const reqsHtml = recipe.requirements.map(req => {
+                    const stockItem = inventory.find(item => item.id === req.id);
+                    const stockQty = stockItem ? stockItem.quantity : 0;
+                    const isDeficient = stockQty < req.qty;
+                    
+                    return `
+                        <div class="flex items-center justify-between text-xs py-1.5 border-b border-slate-800/40">
+                            <span class="text-slate-400 flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full ${isDeficient ? 'bg-rose-500' : 'bg-slate-600'}"></span>
+                                ${stockItem ? stockItem.name : req.id}
+                            </span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-slate-500">Exige ${req.qty}</span>
+                                <span class="font-semibold px-2 py-0.5 rounded text-[10px] ${isDeficient ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-slate-800 text-slate-300 border border-slate-700/50'}">
+                                    Disponível: ${stockQty}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                const card = document.createElement('div');
+                card.className = `bg-slate-900/40 border border-slate-800/80 backdrop-blur-md p-6 rounded-2xl flex flex-col justify-between shadow-xl hover:shadow-2xl hover:border-slate-700/50 transition-all duration-300 relative overflow-hidden group`;
+                
+                // Card badge / header class based on production potential
+                const statusColorClass = maxProduction > 0 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+
+                const isEditing = editingRecipeIndex === index;
+                const titleHtml = isEditing 
+                    ? `
+                        <div class="flex items-center gap-1.5">
+                            <input type="text" id="input-rename-${index}" value="${recipe.name}" onkeydown="if(event.key === 'Enter') saveRename(${index})" class="bg-slate-950 border border-brand-500 text-slate-100 rounded-lg px-2 py-1 text-sm font-outfit font-bold focus:outline-none focus:ring-1 focus:ring-brand-500 w-36">
+                            <button onclick="saveRename(${index})" class="p-1 text-emerald-400 hover:bg-slate-800 rounded transition" title="Salvar">
+                                <i data-lucide="check" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="cancelRename()" class="p-1 text-rose-400 hover:bg-slate-800 rounded transition" title="Cancelar">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    ` 
+                    : `
+                        <div class="flex items-center gap-2 group/title">
+                            <h3 class="font-outfit font-bold text-lg text-slate-200 group-hover:text-white transition-colors">${recipe.name}</h3>
+                            <button onclick="startRename(${index})" class="p-1 text-slate-500 hover:text-slate-300 hover:bg-slate-800/80 rounded transition opacity-0 group-hover/title:opacity-100 focus:opacity-100" title="Editar Nome">
+                                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="deleteRecipe(${index})" class="p-1 text-slate-500 hover:text-rose-400 hover:bg-slate-800/80 rounded transition opacity-0 group-hover/title:opacity-100 focus:opacity-100" title="Excluir Receita">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    `;
+
+                card.innerHTML = `
+                    <div>
+                        <!-- Glowing Header Decorator -->
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${recipe.gradient}"></div>
+                        
+                        <!-- Recipe Title & Icon -->
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                ${titleHtml}
+                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">${recipe.description}</p>
+                                <div class="flex items-center gap-1.5 mt-2">
+                                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Preço Sugerido (R$):</span>
+                                    <input type="number" min="0" value="${recipe.price || 0}" onchange="updateRecipePrice(${index}, this.value)" class="w-20 bg-slate-950/80 border border-slate-800 focus:border-brand-500 rounded px-2 py-0.5 text-xs text-slate-300 outline-none transition text-right font-semibold">
+                                </div>
+                            </div>
+                            <div class="p-2.5 rounded-xl bg-gradient-to-tr ${recipe.gradient} text-white shadow-md ${recipe.glow}">
+                                <i data-lucide="${recipe.icon}" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+
+                        <!-- Requirements -->
+                        <div class="mt-5 mb-6">
+                            <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500 block mb-2">Ingredientes & Receita:</span>
+                            <div class="space-y-1">
+                                ${reqsHtml}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Production Limit Output Area -->
+                    <div class="mt-auto pt-4 border-t border-slate-800/80">
+                        <div class="p-3.5 rounded-xl border ${statusColorClass} flex flex-col items-center text-center justify-center">
+                            <span class="text-[10px] font-bold uppercase tracking-wider block opacity-70">Capacidade Máxima Estimada</span>
+                            <span class="font-outfit font-extrabold text-2xl mt-1 block">
+                                ${maxProduction} ${maxProduction === 1 ? 'unidade' : 'unidades'}
+                            </span>
+                            <span class="text-[10px] text-slate-400 mt-1.5 leading-normal block max-w-[200px]">
+                                ${maxProduction > 0 
+                                    ? `Com o estoque atual, você consegue produzir no máximo: <strong class="text-emerald-400 font-extrabold">${maxProduction}</strong> unidades` 
+                                    : `Estoque insuficiente! Gargalo em: <strong class="text-rose-400 font-extrabold">${bottlenecks.map(b => b.name).join(', ')}</strong>`
+                                }
+                            </span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        // Live Clock Tracker
+        function startClock() {
+            const timeEl = document.getElementById('current-time');
+            const dateEl = document.getElementById('current-date');
+            
+            function updateClock() {
+                const now = new Date();
+                
+                // Format time: HH:MM:SS
+                const hh = String(now.getHours()).padStart(2, '0');
+                const mm = String(now.getMinutes()).padStart(2, '0');
+                const ss = String(now.getSeconds()).padStart(2, '0');
+                timeEl.innerText = `${hh}:${mm}:${ss}`;
+
+                // Format date: Seg, 13 Jul 2026
+                const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+                let dateStr = now.toLocaleDateString('pt-BR', options);
+                // Capitalize first letter
+                dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+                dateEl.innerText = dateStr;
+            }
+            
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            renderInventory();
+            renderProgress();
+            renderRecipes();
+            renderSalesAutocomplete();
+            startClock();
+            logout(); // Force login on start
+
+            // Set up form submission handler
+            const form = document.getElementById('new-recipe-form');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const name = document.getElementById('new-recipe-name').value.trim();
+                    const price = parseFloat(document.getElementById('new-recipe-price').value) || 0;
+                    const description = document.getElementById('new-recipe-desc').value.trim();
+                    const icon = document.getElementById('new-recipe-icon').value;
+                    const gradient = document.getElementById('new-recipe-gradient').value;
+                    
+                    // Gather selected requirements
+                    const requirements = [];
+                    inventory.forEach(item => {
+                        const checkbox = document.getElementById(`checkbox-${item.id}`);
+                        const qtyInput = document.getElementById(`qty-${item.id}`);
+                        if (checkbox && checkbox.checked) {
+                            requirements.push({
+                                id: item.id,
+                                qty: parseInt(qtyInput.value) || 1
+                            });
+                        }
+                    });
+
+                    if (requirements.length === 0) {
+                        alert('Por favor, selecione pelo menos um insumo para a receita.');
+                        return;
+                    }
+
+                    recipes.push({
+                        name,
+                        description: description || 'Nenhuma descrição fornecida.',
+                        icon,
+                        gradient,
+                        glow: 'shadow-indigo-500/10',
+                        price,
+                        requirements
+                    });
+
+                    // Reset form
+                    form.reset();
+                    toggleNewRecipeForm(false); // Collapse form
+                    renderRecipes();
+                    renderSalesAutocomplete();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
